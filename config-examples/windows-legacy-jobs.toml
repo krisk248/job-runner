@@ -1,0 +1,142 @@
+# Job Runner Configuration for Windows Legacy
+# Copy this file to: C:\TTS\REManagement\UAE\SIP-NEW\config\jobs.toml
+
+[global]
+java_home = "C:/TTS/Java/jdk-17"
+java_opts = "-Xms256m -Xmx512m"
+config_dir = "C:/TTS/REManagement/UAE/SIP-NEW/config"
+logs_dir = "C:/TTS/REManagement/UAE/SIP-NEW/Tomcat-9993/logs/jobs"
+
+[apps.adxsip]
+name = "ADXSIP"
+webapp_path = "C:/TTS/REManagement/UAE/SIP-NEW/Tomcat-9993/webapps/ADXSIP"
+
+[apps.sipbo]
+name = "SIPBO"
+webapp_path = "C:/TTS/REManagement/UAE/SIP-NEW/Tomcat-9993/webapps/SIPBO"
+
+[[jobs]]
+id = "notification"
+name = "Notification Processor"
+app = "adxsip"
+main_class = "com.ttsme.sip.jobs.notifications.NotificationSender"
+type = "continuous"
+enabled = true
+description = "Sends general SIP notifications"
+
+[[jobs]]
+id = "admin-notification"
+name = "Admin Notification Sender"
+app = "adxsip"
+main_class = "com.ttsme.sip.jobs.notifications.AdminNotificationSender"
+type = "continuous"
+enabled = true
+description = "Sends admin notifications"
+
+[[jobs]]
+id = "trade-execution"
+name = "Trade Execution Processor"
+app = "adxsip"
+main_class = "com.ttsme.sip.broker.process.TradeExecutionFileProcessor"
+type = "continuous"
+enabled = true
+description = "Processes trade execution files"
+
+[[jobs]]
+id = "dda-registration"
+name = "DDA Registration Processor"
+app = "adxsip"
+main_class = "com.ttsme.sip.dda.bg.DDARegistrationProcessor"
+type = "on-demand"
+enabled = true
+description = "Handles DDA registrations"
+
+[[jobs]]
+id = "dda-payment"
+name = "DDA Payment Processor"
+app = "adxsip"
+main_class = "com.ttsme.sip.dda.bg.DDAPaymentProcessor"
+type = "on-demand"
+enabled = true
+description = "Processes DDA payments"
+
+[[jobs]]
+id = "dda-payment-status"
+name = "DDA Payment Status Processor"
+app = "adxsip"
+main_class = "com.ttsme.sip.dda.bg.DDAPaymentStatusProcessor"
+type = "on-demand"
+enabled = true
+description = "Updates DDA payment statuses"
+
+[[jobs]]
+id = "ipi-payment-request"
+name = "IPI Payment Request Processor"
+app = "adxsip"
+main_class = "com.ttsme.sip.dda.bg.IPIPaymentRequestProcessor"
+type = "on-demand"
+enabled = true
+description = "Processes IPI payment requests"
+
+[[jobs]]
+id = "ipi-payment-status"
+name = "IPI Payment Status Processor"
+app = "adxsip"
+main_class = "com.ttsme.sip.dda.bg.IPIPaymentStatusProcessor"
+type = "on-demand"
+enabled = true
+description = "Updates IPI payment statuses"
+
+[[jobs]]
+id = "check-reset-dda"
+name = "Check and Reset DDA Status"
+app = "adxsip"
+main_class = "com.ttsme.sip.dda.bg.CheckAndResetDDARegistrationStatusProcessor"
+type = "on-demand"
+enabled = true
+description = "Checks and resets DDA registration status"
+
+[[jobs]]
+id = "load-broker-data"
+name = "Load Broker Data"
+app = "adxsip"
+main_class = "com.ttsme.sip.common.bg.processor.LoadBrokerData"
+type = "on-demand"
+enabled = true
+description = "Loads broker details"
+
+[[jobs]]
+id = "load-inav-data"
+name = "Load INAV Feed Data"
+app = "adxsip"
+main_class = "com.ttsme.sip.common.bg.processor.LoadINAVFeedData"
+type = "on-demand"
+enabled = true
+description = "Loads INAV feed data"
+
+[[jobs]]
+id = "nin-update"
+name = "NIN File Data Processor"
+app = "adxsip"
+main_class = "com.ttsme.sip.common.bg.processor.NINFileDataProcessor"
+type = "on-demand"
+enabled = true
+description = "Processes NIN file data"
+
+[[jobs]]
+id = "payment-reminder"
+name = "Payment Reminder Notification"
+app = "adxsip"
+main_class = "com.ttsme.sip.jobs.notifications.PaymentReminderNotificationProcessor"
+type = "on-demand"
+enabled = true
+description = "Sends payment reminder notifications"
+
+[[jobs]]
+id = "broker-integration"
+name = "Broker Integration Processor"
+app = "adxsip"
+main_class = "com.ttsme.sip.dda.bg.BrokerIntegrationProcessor"
+type = "on-demand"
+enabled = true
+description = "Handles broker integration"
