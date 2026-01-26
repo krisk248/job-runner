@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Runner</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <h1>Job Runner</h1>
+                <span class="version">v1.0.0</span>
+            </div>
+            <div class="header-right">
+                <span class="status-badge" id="statusBadge">
+                    <span class="status-dot"></span>
+                    <span id="runningCount">0</span> running
+                </span>
+                <button class="btn btn-icon" onclick="refreshJobs()" title="Refresh">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                        <path d="M17.65 6.35A7.958 7.958 0 0012 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0112 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+                    </svg>
+                </button>
+                <button class="btn btn-icon" onclick="showSettings()" title="Settings">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                        <path d="M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.488.488 0 00-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 00-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="tabs">
+            <button class="tab active" data-tab="jobs" onclick="showTab('jobs')">Jobs</button>
+            <button class="tab" data-tab="logs" onclick="showTab('logs')">Logs</button>
+            <button class="tab" data-tab="settings" onclick="showTab('settings')">Settings</button>
+        </nav>
+
+        <!-- Jobs Tab -->
+        <main class="content" id="jobsTab">
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <button class="btn btn-success" onclick="startAllJobs()">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                        <path d="M8 5v14l11-7z"/>
+                    </svg>
+                    Start All Continuous
+                </button>
+                <button class="btn btn-danger" onclick="stopAllJobs()">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                        <path d="M6 6h12v12H6z"/>
+                    </svg>
+                    Stop All
+                </button>
+                <button class="btn btn-primary" onclick="showAddJobModal()">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                    </svg>
+                    Add Job
+                </button>
+            </div>
+
+            <!-- Jobs Table -->
+            <div class="table-container">
+                <table class="jobs-table">
+                    <thead>
+                        <tr>
+                            <th>Job Name</th>
+                            <th>Application</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="jobsTableBody">
+                        <!-- Jobs will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+
+        <!-- Logs Tab -->
+        <main class="content hidden" id="logsTab">
+            <div class="logs-header">
+                <select id="logJobSelect" onchange="loadJobLogs()">
+                    <option value="">Select a job to view logs...</option>
+                </select>
+                <div class="logs-actions">
+                    <button class="btn btn-sm" onclick="loadJobLogs()">Refresh</button>
+                    <button class="btn btn-sm btn-danger" onclick="clearJobLogs()">Clear</button>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="autoRefreshLogs" onchange="toggleAutoRefresh()">
+                        Auto-refresh
+                    </label>
+                </div>
+            </div>
+            <pre class="logs-output" id="logsOutput">Select a job to view its logs...</pre>
+        </main>
+
+        <!-- Settings Tab -->
+        <main class="content hidden" id="settingsTab">
+            <!-- Global Settings -->
+            <section class="settings-section">
+                <h2>Global Settings</h2>
+                <form id="globalSettingsForm" onsubmit="saveGlobalSettings(event)">
+                    <div class="form-group">
+                        <label for="javaHome">Java Home</label>
+                        <input type="text" id="javaHome" name="javaHome" placeholder="/opt/java/openjdk">
+                    </div>
+                    <div class="form-group">
+                        <label for="javaOpts">Java Options</label>
+                        <input type="text" id="javaOpts" name="javaOpts" placeholder="-Xms256m -Xmx512m">
+                    </div>
+                    <div class="form-group">
+                        <label for="configDir">Config Directory</label>
+                        <input type="text" id="configDir" name="configDir" placeholder="/opt/config">
+                    </div>
+                    <div class="form-group">
+                        <label for="logsDir">Logs Directory</label>
+                        <input type="text" id="logsDir" name="logsDir" placeholder="/opt/logs/jobs">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Global Settings</button>
+                </form>
+            </section>
+
+            <!-- Applications -->
+            <section class="settings-section">
+                <h2>Applications (Classpath Sources)</h2>
+                <div id="appsContainer">
+                    <!-- Apps will be loaded here -->
+                </div>
+                <button class="btn btn-primary" onclick="showAddAppModal()">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                    </svg>
+                    Add Application
+                </button>
+            </section>
+
+            <!-- Config File Info -->
+            <section class="settings-section">
+                <h2>Configuration</h2>
+                <div class="info-box">
+                    <p><strong>Config File:</strong> <span id="configFilePath">/opt/config/jobs.toml</span></p>
+                    <button class="btn btn-sm" onclick="reloadConfig()">Reload Config</button>
+                </div>
+            </section>
+        </main>
+
+        <!-- Add/Edit Job Modal -->
+        <div class="modal" id="jobModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="jobModalTitle">Add Job</h2>
+                    <button class="btn btn-icon" onclick="closeModal('jobModal')">&times;</button>
+                </div>
+                <form id="jobForm" onsubmit="saveJob(event)">
+                    <input type="hidden" id="jobId" name="id">
+                    <div class="form-group">
+                        <label for="jobName">Job Name *</label>
+                        <input type="text" id="jobName" name="name" required placeholder="Notification Processor">
+                    </div>
+                    <div class="form-group">
+                        <label for="jobApp">Application *</label>
+                        <select id="jobApp" name="app" required>
+                            <!-- Apps will be loaded here -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="jobMainClass">Main Class *</label>
+                        <input type="text" id="jobMainClass" name="mainClass" required
+                               placeholder="com.example.jobs.MyProcessor">
+                    </div>
+                    <div class="form-group">
+                        <label for="jobType">Type</label>
+                        <select id="jobType" name="type">
+                            <option value="on-demand">On-demand</option>
+                            <option value="continuous">Continuous</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="jobDescription">Description</label>
+                        <textarea id="jobDescription" name="description" rows="2"
+                                  placeholder="Optional description..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="jobEnabled" name="enabled" checked>
+                            Enabled
+                        </label>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn" onclick="closeModal('jobModal')">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Job</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Add/Edit App Modal -->
+        <div class="modal" id="appModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="appModalTitle">Add Application</h2>
+                    <button class="btn btn-icon" onclick="closeModal('appModal')">&times;</button>
+                </div>
+                <form id="appForm" onsubmit="saveApp(event)">
+                    <input type="hidden" id="appIdField" name="id">
+                    <div class="form-group">
+                        <label for="appName">Application ID *</label>
+                        <input type="text" id="appIdInput" name="appId" required placeholder="adxsip">
+                    </div>
+                    <div class="form-group">
+                        <label for="appDisplayName">Display Name *</label>
+                        <input type="text" id="appDisplayName" name="name" required placeholder="ADXSIP">
+                    </div>
+                    <div class="form-group">
+                        <label for="appWebappPath">Webapp Path *</label>
+                        <input type="text" id="appWebappPath" name="webappPath" required
+                               placeholder="/usr/local/tomcat/webapps/ADXSIP">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn" onclick="closeModal('appModal')">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Application</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Toast Notifications -->
+        <div class="toast-container" id="toastContainer"></div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
