@@ -558,6 +558,11 @@ public class ApiServlet extends HttpServlet {
     // ==================== Utility Methods ====================
 
     private void sendJson(HttpServletResponse resp, Object data) throws IOException {
+        // Prevent browser caching of API responses
+        resp.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+        resp.setHeader("Pragma", "no-cache");
+        resp.setHeader("Expires", "0");
+
         PrintWriter out = resp.getWriter();
         out.print(gson.toJson(data));
         out.flush();

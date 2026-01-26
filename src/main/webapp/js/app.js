@@ -9,6 +9,8 @@ let jobs = [];
 let apps = {};
 let globalConfig = {};
 let autoRefreshInterval = null;
+let jobsPollingInterval = null;
+const JOBS_POLL_INTERVAL = 5000; // Poll job status every 5 seconds
 
 // ==================== Initialization ====================
 
@@ -17,7 +19,45 @@ document.addEventListener('DOMContentLoaded', () => {
     loadJobs();
     loadApps();
     loadGlobalConfig();
+    startJobsPolling(); // Auto-refresh job statuses
 });
+
+// ==================== Auto-Polling ====================
+
+function startJobsPolling() {
+    if (jobsPollingInterval) return; // Already running
+    jobsPollingInterval = setInterval(async () => {
+        try {
+            const newJobs = await apiCall('/jobs');
+            // Only update if status changed to avoid UI flicker
+            if (hasStatusChanged(jobs, newJobs)) {
+                jobs = newJobs;
+                renderJobsTable();
+                updateRunningCount();
+            }
+        } catch (error) {
+            console.error('Polling failed:', error);
+        }
+    }, JOBS_POLL_INTERVAL);
+}
+
+function stopJobsPolling() {
+    if (jobsPollingInterval) {
+        clearInterval(jobsPollingInterval);
+        jobsPollingInterval = null;
+    }
+}
+
+function hasStatusChanged(oldJobs, newJobs) {
+    if (oldJobs.length !== newJobs.length) return true;
+    for (let i = 0; i < newJobs.length; i++) {
+        const oldJob = oldJobs.find(j => j.id === newJobs[i].id);
+        if (!oldJob || oldJob.status !== newJobs[i].status || oldJob.pid !== newJobs[i].pid) {
+            return true;
+        }
+    }
+    return false;
+}
 
 // ==================== API Functions ====================
 
@@ -25,8 +65,11 @@ async function apiCall(endpoint, method = 'GET', data = null) {
     const options = {
         method,
         headers: {
-            'Content-Type': 'application/json'
-        }
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache'
+        },
+        cache: 'no-store' // Prevent browser from caching API responses
     };
 
     if (data) {
