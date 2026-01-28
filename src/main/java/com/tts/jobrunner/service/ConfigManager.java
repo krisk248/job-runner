@@ -132,6 +132,9 @@ public class ConfigManager {
                         job.setParams(params);
                     }
 
+                    // Handle args_required flag
+                    job.setArgsRequired(jobToml.getBoolean("args_required", false));
+
                     config.addJob(job);
                 }
             }
@@ -209,6 +212,11 @@ public class ConfigManager {
                         sb.append("\"").append(escapeToml(job.getParams().get(i))).append("\"");
                     }
                     sb.append("]\n");
+                }
+
+                // Write args_required if true
+                if (job.isArgsRequired()) {
+                    sb.append("args_required = true\n");
                 }
 
                 sb.append("\n");

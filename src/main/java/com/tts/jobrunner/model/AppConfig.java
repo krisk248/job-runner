@@ -54,14 +54,14 @@ public class AppConfig implements Serializable {
      * Get WEB-INF/classes path
      */
     public String getClassesPath() {
-        return webappPath + "/WEB-INF/classes";
+        return webappPath + File.separator + "WEB-INF" + File.separator + "classes";
     }
 
     /**
      * Get WEB-INF/lib path
      */
     public String getLibPath() {
-        return webappPath + "/WEB-INF/lib";
+        return webappPath + File.separator + "WEB-INF" + File.separator + "lib";
     }
 
     /**

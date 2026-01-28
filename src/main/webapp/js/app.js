@@ -222,8 +222,38 @@ function renderJobsTable() {
 }
 
 async function startJob(jobId) {
+    // Find the job to check if it requires arguments
+    const job = jobs.find(j => j.id === jobId);
+
+    if (job && job.argsRequired) {
+        // Show arguments modal only if args_required = true
+        document.getElementById('startJobId').value = jobId;
+        document.getElementById('startJobModalTitle').textContent = 'Start: ' + job.name;
+        document.getElementById('jobArgs').value = '';
+        document.getElementById('jobArgs').placeholder = job.description || 'e.g., arg1 arg2 arg3';
+        openModal('startJobModal');
+    } else {
+        // Start directly without args modal
+        doStartJob(jobId, null);
+    }
+}
+
+async function confirmStartJob(event) {
+    event.preventDefault();
+    const jobId = document.getElementById('startJobId').value;
+    const argsStr = document.getElementById('jobArgs').value.trim();
+
+    // Parse arguments (split by whitespace)
+    const args = argsStr ? argsStr.split(/\s+/) : null;
+
+    closeModal('startJobModal');
+    doStartJob(jobId, args);
+}
+
+async function doStartJob(jobId, args) {
     try {
-        const result = await apiCall(`/jobs/${jobId}/start`, 'POST');
+        const body = args ? { args: args } : null;
+        const result = await apiCall(`/jobs/${jobId}/start`, 'POST', body);
         showToast(result.message, result.success ? 'success' : 'error');
         loadJobs();
     } catch (error) {

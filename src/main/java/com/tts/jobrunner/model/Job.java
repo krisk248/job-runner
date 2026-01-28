@@ -59,6 +59,7 @@ public class Job implements Serializable {
     private boolean enabled;
     private List<String> params;
     private String description;
+    private boolean argsRequired;  // If true, show args modal on start
 
     // Runtime state (not persisted)
     private transient JobStatus status = JobStatus.STOPPED;
@@ -144,6 +145,14 @@ public class Job implements Serializable {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public boolean isArgsRequired() {
+        return argsRequired;
+    }
+
+    public void setArgsRequired(boolean argsRequired) {
+        this.argsRequired = argsRequired;
     }
 
     public JobStatus getStatus() {

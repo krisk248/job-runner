@@ -29,6 +29,22 @@ public class JobManager {
         this.jobLogs = new ConcurrentHashMap<>();
         this.logReaderThreads = new ConcurrentHashMap<>();
         this.executorService = Executors.newCachedThreadPool();
+
+        // Register shutdown hook to kill all processes when JVM exits
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            LOGGER.info("JVM shutdown detected, stopping all jobs...");
+            for (String jobId : new ArrayList<>(runningProcesses.keySet())) {
+                try {
+                    Process process = runningProcesses.get(jobId);
+                    if (process != null && process.isAlive()) {
+                        LOGGER.info("Killing job process: " + jobId);
+                        process.destroyForcibly();
+                    }
+                } catch (Exception e) {
+                    LOGGER.warning("Error killing job " + jobId + ": " + e.getMessage());
+                }
+            }
+        }, "JobRunner-ShutdownHook"));
     }
 
     public static synchronized JobManager getInstance() {
@@ -39,9 +55,18 @@ public class JobManager {
     }
 
     /**
-     * Start a job
+     * Start a job (without runtime arguments)
      */
     public synchronized JobResult startJob(String jobId) {
+        return startJob(jobId, null);
+    }
+
+    /**
+     * Start a job with optional runtime arguments
+     * @param jobId The job ID to start
+     * @param runtimeArgs Optional runtime arguments (passed after configured params)
+     */
+    public synchronized JobResult startJob(String jobId, List<String> runtimeArgs) {
         ConfigManager configManager = ConfigManager.getInstance();
         JobsConfig config = configManager.getConfig();
         Job job = config.getJob(jobId);
@@ -59,8 +84,8 @@ public class JobManager {
         }
 
         try {
-            // Build command
-            List<String> command = buildCommand(job, config);
+            // Build command with optional runtime args
+            List<String> command = buildCommand(job, config, runtimeArgs);
             LOGGER.info("Starting job: " + jobId + " with command: " + String.join(" ", command));
 
             // Create process builder
@@ -248,7 +273,7 @@ public class JobManager {
 
     // ==================== Private Methods ====================
 
-    private List<String> buildCommand(Job job, JobsConfig config) {
+    private List<String> buildCommand(Job job, JobsConfig config, List<String> runtimeArgs) {
         List<String> command = new ArrayList<>();
 
         // Java executable
@@ -272,9 +297,14 @@ public class JobManager {
         // Main class
         command.add(job.getMainClass());
 
-        // Parameters
+        // Configured parameters (from jobs.toml)
         if (job.getParams() != null) {
             command.addAll(job.getParams());
+        }
+
+        // Runtime arguments (from UI input, added after configured params)
+        if (runtimeArgs != null && !runtimeArgs.isEmpty()) {
+            command.addAll(runtimeArgs);
         }
 
         return command;

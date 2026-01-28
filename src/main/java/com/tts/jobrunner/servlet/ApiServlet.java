@@ -103,9 +103,9 @@ public class ApiServlet extends HttpServlet {
 
         try {
             if (pathInfo.matches("/jobs/[^/]+/start")) {
-                // POST /api/jobs/{id}/start - Start a job
+                // POST /api/jobs/{id}/start - Start a job (with optional runtime args)
                 String jobId = pathInfo.split("/")[2];
-                handleStartJob(jobId, resp);
+                handleStartJob(jobId, req, resp);
 
             } else if (pathInfo.matches("/jobs/[^/]+/stop")) {
                 // POST /api/jobs/{id}/stop - Stop a job
@@ -237,6 +237,7 @@ public class ApiServlet extends HttpServlet {
             jobMap.put("pid", job.getPid());
             jobMap.put("startTime", job.getStartTime());
             jobMap.put("description", job.getDescription());
+            jobMap.put("argsRequired", job.isArgsRequired());
             jobList.add(jobMap);
         }
 
@@ -268,8 +269,11 @@ public class ApiServlet extends HttpServlet {
         sendJson(resp, result);
     }
 
-    private void handleStartJob(String jobId, HttpServletResponse resp) throws IOException {
-        JobManager.JobResult result = JobManager.getInstance().startJob(jobId);
+    private void handleStartJob(String jobId, HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        // Parse optional runtime arguments from request body
+        List<String> runtimeArgs = parseRuntimeArgs(req);
+
+        JobManager.JobResult result = JobManager.getInstance().startJob(jobId, runtimeArgs);
 
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("success", result.isSuccess());
@@ -585,5 +589,30 @@ public class ApiServlet extends HttpServlet {
             }
         }
         return sb.toString();
+    }
+
+    /**
+     * Parse runtime arguments from request body.
+     * Expects JSON: { "args": ["arg1", "arg2", ...] }
+     */
+    private List<String> parseRuntimeArgs(HttpServletRequest req) {
+        try {
+            String body = readBody(req);
+            if (body == null || body.trim().isEmpty()) {
+                return null;
+            }
+
+            JsonObject json = JsonParser.parseString(body).getAsJsonObject();
+            if (json.has("args") && json.get("args").isJsonArray()) {
+                List<String> args = new ArrayList<>();
+                for (int i = 0; i < json.get("args").getAsJsonArray().size(); i++) {
+                    args.add(json.get("args").getAsJsonArray().get(i).getAsString());
+                }
+                return args.isEmpty() ? null : args;
+            }
+        } catch (Exception e) {
+            LOGGER.fine("Could not parse runtime args: " + e.getMessage());
+        }
+        return null;
     }
 }

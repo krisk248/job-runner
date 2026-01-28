@@ -200,6 +200,32 @@
             </div>
         </div>
 
+        <!-- Start Job with Arguments Modal -->
+        <div class="modal" id="startJobModal">
+            <div class="modal-content" style="max-width: 500px;">
+                <div class="modal-header">
+                    <h2 id="startJobModalTitle">Start Job</h2>
+                    <button class="btn btn-icon" onclick="closeModal('startJobModal')">&times;</button>
+                </div>
+                <form id="startJobForm" onsubmit="confirmStartJob(event)">
+                    <input type="hidden" id="startJobId" name="jobId">
+                    <div class="form-group">
+                        <label for="jobArgs">Arguments (space-separated)</label>
+                        <input type="text" id="jobArgs" name="args"
+                               placeholder="e.g., arg1 arg2 arg3"
+                               autocomplete="off">
+                        <small style="color: var(--text-muted);">
+                            Leave empty if no arguments needed. Example: <code>1 2 3 all 0</code>
+                        </small>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn" onclick="closeModal('startJobModal')">Cancel</button>
+                        <button type="submit" class="btn btn-success">Start Job</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <!-- Add/Edit App Modal -->
         <div class="modal" id="appModal">
             <div class="modal-content">

@@ -56,6 +56,13 @@ public class GlobalConfig implements Serializable {
     }
 
     public String getJavaCmd() {
-        return javaHome + "/bin/java";
+        // Handle both Windows and Unix paths
+        String separator = System.getProperty("file.separator");
+        String cmd = javaHome + separator + "bin" + separator + "java";
+        // On Windows, add .exe extension
+        if (System.getProperty("os.name").toLowerCase().contains("win")) {
+            cmd += ".exe";
+        }
+        return cmd;
     }
 }

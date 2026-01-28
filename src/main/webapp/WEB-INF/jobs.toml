@@ -1,143 +1,86 @@
-# Job Runner Configuration
-# This is the default configuration bundled with the WAR
-# Place a copy at /opt/config/jobs.toml to override
+# Job Runner Configuration - ADXIPO
+# ============================================================================
+# Deploy this file to: C:/TTS/REManagement/UAE/ADX/ipo-config/jobs.toml
+# ============================================================================
 
 [global]
-java_home = "/opt/java/openjdk"
-java_opts = "-Xms256m -Xmx512m"
-config_dir = "/opt/config"
-logs_dir = "/usr/local/tomcat/logs/jobs"
+java_home = "C:/TTS/Java/jdk1.8.0_191"
+java_opts = "-Xms1024m -Xmx2048m"
+config_dir = "C:/TTS/REManagement/UAE/ADX/ipo-config"
+logs_dir = "C:/TTS/REManagement/UAE/ADX/Tomcat/logs/jobs"
 
-[apps.adxsip]
-name = "ADXSIP"
-webapp_path = "/usr/local/tomcat/webapps/ADXSIP"
+# ============================================================================
+# APPLICATIONS (Classpath Sources)
+# ============================================================================
 
-[apps.sipbo]
-name = "SIPBO"
-webapp_path = "/usr/local/tomcat/webapps/SIPBO"
+[apps.adxipo]
+name = "ADXIPO"
+webapp_path = "C:/TTS/REManagement/UAE/ADX/Tomcat/webapps/ADXIPO"
+
+[apps.aiws]
+name = "AIWS"
+webapp_path = "C:/TTS/REManagement/UAE/ADX/Tomcat/webapps/AIWS"
+
+# ============================================================================
+# CONTINUOUS JOBS (Long-running, auto-start with "Start All Continuous")
+# ============================================================================
 
 [[jobs]]
-id = "notification"
-name = "Notification Processor"
-app = "adxsip"
-main_class = "com.ttsme.sip.jobs.notifications.NotificationSender"
+id = "iws-email-sender"
+name = "IWS Email Sender"
+app = "aiws"
+main_class = "com.ttsme.iws.processes.IWSEmailSender"
 type = "continuous"
 enabled = true
-description = "Sends general SIP notifications"
+description = "Sends IWS email notifications"
 
 [[jobs]]
-id = "admin-notification"
-name = "Admin Notification Sender"
-app = "adxsip"
-main_class = "com.ttsme.sip.jobs.notifications.AdminNotificationSender"
+id = "offer-process-listener"
+name = "Offer Process Listener"
+app = "adxipo"
+main_class = "com.ttsme.dms.processes.OfferProcessListener"
 type = "continuous"
 enabled = true
-description = "Sends admin notifications"
+description = "Listens for offer-related events and file changes"
+
+# ============================================================================
+# ON-DEMAND JOBS (Manual trigger, one-time execution)
+# ============================================================================
 
 [[jobs]]
-id = "trade-execution"
-name = "Trade Execution Processor"
-app = "adxsip"
-main_class = "com.ttsme.sip.broker.process.TradeExecutionFileProcessor"
-type = "continuous"
-enabled = true
-description = "Processes trade execution files"
-
-[[jobs]]
-id = "dda-registration"
-name = "DDA Registration Processor"
-app = "adxsip"
-main_class = "com.ttsme.sip.jobs.dda.DDARegistrationProcessor"
+id = "iws-recon-process"
+name = "IWS Recon Process"
+app = "adxipo"
+main_class = "com.ttsme.iws.processes.ADXIWSPaymentReconFileProcessListener"
 type = "on-demand"
 enabled = true
-description = "Handles DDA registrations"
+description = "Processes payment reconciliation files"
 
 [[jobs]]
-id = "dda-payment-request"
-name = "DDA Payment Request Processor"
-app = "adxsip"
-main_class = "com.ttsme.sip.jobs.dda.DDAPaymentRequestProcessor"
+id = "offer-data-cleanup"
+name = "Offer Data Cleanup"
+app = "adxipo"
+main_class = "com.ttsme.bg.processes.offerDataCleanup"
 type = "on-demand"
 enabled = true
-description = "Processes DDA payment requests"
-
-[[jobs]]
-id = "dda-payment-status"
-name = "DDA Payment Status Processor"
-app = "adxsip"
-main_class = "com.ttsme.sip.jobs.dda.DDAPaymentStatusProcessor"
-type = "on-demand"
-enabled = true
-description = "Updates DDA payment statuses"
-
-[[jobs]]
-id = "ipi-payment-request"
-name = "IPI Payment Request Processor"
-app = "adxsip"
-main_class = "com.ttsme.sip.jobs.ipi.IPIPaymentRequestProcessor"
-type = "on-demand"
-enabled = true
-description = "Processes IPI payment requests"
-
-[[jobs]]
-id = "ipi-payment-status"
-name = "IPI Payment Status Processor"
-app = "adxsip"
-main_class = "com.ttsme.sip.jobs.ipi.IPIPaymentStatusProcessor"
-type = "on-demand"
-enabled = true
-description = "Updates IPI payment statuses"
-
-[[jobs]]
-id = "check-reset-dda"
-name = "Check and Reset DDA Status"
-app = "adxsip"
-main_class = "com.ttsme.sip.jobs.dda.CheckAndResetDDARegistrationStatusProcessor"
-type = "on-demand"
-enabled = true
-description = "Checks and resets DDA registration status"
-
-[[jobs]]
-id = "load-broker-data"
-name = "Load Broker Data"
-app = "adxsip"
-main_class = "com.ttsme.sip.jobs.data.LoadBrokerData"
-type = "on-demand"
-enabled = true
-description = "Loads broker details"
-
-[[jobs]]
-id = "load-inav-data"
-name = "Load INAV Feed Data"
-app = "adxsip"
-main_class = "com.ttsme.sip.jobs.data.LoadINAVFeedData"
-type = "on-demand"
-enabled = true
-description = "Loads INAV feed data"
-
-[[jobs]]
-id = "nin-update"
-name = "NIN Update File Processor"
-app = "adxsip"
-main_class = "com.ttsme.sip.jobs.nin.NINUpdateFileProcessor"
-type = "on-demand"
-enabled = true
-description = "Processes NIN file updates"
+description = "Cleans up expired offer data from database"
 
 [[jobs]]
 id = "payment-reminder"
 name = "Payment Reminder Notification"
-app = "adxsip"
-main_class = "com.ttsme.sip.jobs.notifications.PaymentReminderNotificationProcessor"
+app = "adxipo"
+main_class = "com.ttsme.iws.notification.processor.PaymentReminderProcessor"
 type = "on-demand"
 enabled = true
-description = "Sends payment reminder notifications"
+description = "Enter reminder ID or leave empty"
+args_required = true
 
 [[jobs]]
-id = "broker-integration"
-name = "Broker Integration Processor"
-app = "adxsip"
-main_class = "com.ttsme.sip.jobs.broker.BrokerIntegrationProcessor"
+id = "generate-csv-dar"
+name = "Generate CSV DAR Report"
+app = "adxipo"
+main_class = "com.ttsme.oms.reporting.CSVRunner"
 type = "on-demand"
 enabled = true
-description = "Handles broker integration"
+description = "Args: companyCode offerCode banksCode reportType asOfNow (e.g., 1 2 all all 0)"
+args_required = true
