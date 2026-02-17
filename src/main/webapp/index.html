@@ -182,6 +182,12 @@
                         </select>
                     </div>
                     <div class="form-group">
+                        <label for="jobJavaOpts">JVM Options</label>
+                        <input type="text" id="jobJavaOpts" name="javaOpts"
+                               placeholder="e.g. --add-opens=java.base/java.lang=ALL-UNNAMED">
+                        <small style="color: var(--text-muted, #888); font-size: 0.8em;">Per-job JVM flags (appended after global java_opts)</small>
+                    </div>
+                    <div class="form-group">
                         <label for="jobDescription">Description</label>
                         <textarea id="jobDescription" name="description" rows="2"
                                   placeholder="Optional description..."></textarea>

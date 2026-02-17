@@ -303,6 +303,7 @@ function showAddJobModal() {
     document.getElementById('jobForm').reset();
     document.getElementById('jobId').value = '';
     document.getElementById('jobEnabled').checked = true;
+    document.getElementById('jobJavaOpts').value = '';
     populateAppSelect();
     openModal('jobModal');
 }
@@ -318,6 +319,7 @@ function editJob(jobId) {
     document.getElementById('jobType').value = job.type;
     document.getElementById('jobDescription').value = job.description || '';
     document.getElementById('jobEnabled').checked = job.enabled;
+    document.getElementById('jobJavaOpts').value = job.javaOpts || '';
 
     populateAppSelect();
     document.getElementById('jobApp').value = job.apps[0] || '';
@@ -331,6 +333,7 @@ async function saveJob(event) {
     const jobId = document.getElementById('jobId').value;
     const isNew = !jobId;
 
+    const javaOptsVal = document.getElementById('jobJavaOpts').value.trim();
     const data = {
         id: isNew ? document.getElementById('jobName').value.toLowerCase().replace(/\s+/g, '-') : jobId,
         name: document.getElementById('jobName').value,
@@ -338,7 +341,8 @@ async function saveJob(event) {
         mainClass: document.getElementById('jobMainClass').value,
         type: document.getElementById('jobType').value,
         description: document.getElementById('jobDescription').value,
-        enabled: document.getElementById('jobEnabled').checked
+        enabled: document.getElementById('jobEnabled').checked,
+        javaOpts: javaOptsVal || null
     };
 
     try {

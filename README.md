@@ -15,6 +15,7 @@ A simple web UI to manage and run background Java processes for QA and Dev teams
 - TOML-based configuration
 - Support for multiple applications (classpath sources)
 - **Java 11+** compatible (Tomcat 10, 11)
+- Per-job JVM options (e.g. `--add-opens` for legacy apps on Java 9+)
 
 ## Quick Start
 
@@ -66,6 +67,31 @@ type = "on-demand"
 enabled = true
 description = "Description of what this job does"
 ```
+
+### Per-Job JVM Options
+
+Jobs can have their own `java_opts` that are appended after the global `java_opts`. This is useful for legacy apps running on Java 9+ that need `--add-opens` flags for old Hibernate/Javassist:
+
+```toml
+[global]
+java_opts = "-Xms256m -Xmx4096m"   # Applied to all jobs
+
+[[jobs]]
+id = "offer-listener"
+name = "Offer Process Listener"
+app = "tabadul"
+main_class = "com.ttsme.dms.processes.OfferProcessListener"
+type = "continuous"
+enabled = true
+java_opts = "--add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED"
+```
+
+The resulting command becomes:
+```
+java -Xms256m -Xmx4096m --add-opens=java.base/java.lang=ALL-UNNAMED ... -classpath ... MainClass
+```
+
+Per-job `java_opts` can also be set from the web UI when adding or editing a job.
 
 ### Job Types
 

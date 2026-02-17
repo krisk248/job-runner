@@ -77,7 +77,12 @@ main_class = "com.ttsme.sip.jobs.notifications.NotificationSender"
 type = "continuous"
 enabled = true
 description = "Sends general SIP notifications"
+java_opts = "--add-opens=java.base/java.lang=ALL-UNNAMED"
 ```
+
+### Per-Job JVM Options
+
+Jobs support an optional `java_opts` field. These are appended after the global `java_opts` when building the process command. This was added to solve the Java 9+ module system issue where old Hibernate/Javassist libraries need `--add-opens` flags. Each job can declare its own flags without polluting the global config, and the field is also editable from the web UI.
 
 ## API Endpoints
 
@@ -156,6 +161,10 @@ mvn clean package
 - **Solution**: Created two repositories:
   - `job-runner` - Jakarta EE (Tomcat 10+)
   - `job-runner-8` - Java EE (Tomcat 9)
+
+### Per-Job JVM Options (2026-02)
+- **Problem**: Old Hibernate/Javassist apps fail on Java 9+ with `InaccessibleObjectException` because they need `--add-opens` flags
+- **Solution**: Added per-job `java_opts` field in TOML config and UI. Global opts are applied first, then per-job opts are appended. Each job can declare its own JVM flags independently.
 
 ### Auto-Polling Fix (2026-01)
 - **Problem**: Job status didn't auto-update when jobs finished

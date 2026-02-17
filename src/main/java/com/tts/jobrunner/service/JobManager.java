@@ -279,10 +279,20 @@ public class JobManager {
         // Java executable
         command.add(config.getGlobal().getJavaCmd());
 
-        // JVM options
+        // Global JVM options
         String javaOpts = config.getGlobal().getJavaOpts();
         if (javaOpts != null && !javaOpts.isEmpty()) {
             for (String opt : javaOpts.split("\\s+")) {
+                if (!opt.isEmpty()) {
+                    command.add(opt);
+                }
+            }
+        }
+
+        // Per-job JVM options (appended after global)
+        String jobJavaOpts = job.getJavaOpts();
+        if (jobJavaOpts != null && !jobJavaOpts.isEmpty()) {
+            for (String opt : jobJavaOpts.split("\\s+")) {
                 if (!opt.isEmpty()) {
                     command.add(opt);
                 }

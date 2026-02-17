@@ -238,6 +238,7 @@ public class ApiServlet extends HttpServlet {
             jobMap.put("startTime", job.getStartTime());
             jobMap.put("description", job.getDescription());
             jobMap.put("argsRequired", job.isArgsRequired());
+            jobMap.put("javaOpts", job.getJavaOpts());
             jobList.add(jobMap);
         }
 
@@ -355,6 +356,9 @@ public class ApiServlet extends HttpServlet {
             json.get("params").getAsJsonArray().forEach(e -> params.add(e.getAsString()));
             job.setParams(params);
         }
+        if (json.has("javaOpts") && !json.get("javaOpts").isJsonNull()) {
+            job.setJavaOpts(json.get("javaOpts").getAsString());
+        }
 
         ConfigManager configManager = ConfigManager.getInstance();
         configManager.getConfig().addJob(job);
@@ -381,6 +385,10 @@ public class ApiServlet extends HttpServlet {
         if (json.has("type")) job.setType(json.get("type").getAsString());
         if (json.has("enabled")) job.setEnabled(json.get("enabled").getAsBoolean());
         if (json.has("description")) job.setDescription(json.get("description").getAsString());
+        if (json.has("javaOpts")) {
+            String opts = json.get("javaOpts").isJsonNull() ? "" : json.get("javaOpts").getAsString();
+            job.setJavaOpts(opts.isEmpty() ? null : opts);
+        }
 
         if (json.has("app")) {
             if (json.get("app").isJsonArray()) {

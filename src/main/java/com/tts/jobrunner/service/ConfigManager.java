@@ -135,6 +135,12 @@ public class ConfigManager {
                     // Handle args_required flag
                     job.setArgsRequired(jobToml.getBoolean("args_required", false));
 
+                    // Handle per-job java_opts
+                    String jobJavaOpts = jobToml.getString("java_opts");
+                    if (jobJavaOpts != null && !jobJavaOpts.isEmpty()) {
+                        job.setJavaOpts(jobJavaOpts);
+                    }
+
                     config.addJob(job);
                 }
             }
@@ -217,6 +223,11 @@ public class ConfigManager {
                 // Write args_required if true
                 if (job.isArgsRequired()) {
                     sb.append("args_required = true\n");
+                }
+
+                // Write per-job java_opts if set
+                if (job.getJavaOpts() != null && !job.getJavaOpts().isEmpty()) {
+                    sb.append("java_opts = \"").append(escapeToml(job.getJavaOpts())).append("\"\n");
                 }
 
                 sb.append("\n");

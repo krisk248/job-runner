@@ -60,6 +60,7 @@ public class Job implements Serializable {
     private List<String> params;
     private String description;
     private boolean argsRequired;  // If true, show args modal on start
+    private String javaOpts;  // Per-job JVM options (appended after global java_opts)
 
     // Runtime state (not persisted)
     private transient JobStatus status = JobStatus.STOPPED;
@@ -153,6 +154,14 @@ public class Job implements Serializable {
 
     public void setArgsRequired(boolean argsRequired) {
         this.argsRequired = argsRequired;
+    }
+
+    public String getJavaOpts() {
+        return javaOpts;
+    }
+
+    public void setJavaOpts(String javaOpts) {
+        this.javaOpts = javaOpts;
     }
 
     public JobStatus getStatus() {
